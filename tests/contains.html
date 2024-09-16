@@ -1,0 +1,51 @@
+<html>
+<body>
+<script>
+  class MyComponent extends HTMLElement {
+    connectedCallback() {
+      const shadow = this.attachShadow({ mode: "open" });
+      const aaa = document.createElement("div");
+      aaa.id = 'aaa';
+      const slot = document.createElement('slot');
+      slot.name = 'a';
+      aaa.appendChild(slot);
+      shadow.appendChild(aaa);
+    }
+  }
+  customElements.define("my-component", MyComponent);
+</script>
+<my-component>
+  <div id="bbb" slot="a">bbb slotted in slot a</div>
+  <div id="ccc">
+    <div id="ddd">wont be visible as no slot for ccc to go in</div>
+  </div>
+</my-component>
+<script type="module">
+  import contains from '../contains.js';
+  function expect(descr, value, tobe) {
+    if (value !== tobe) console.error(descr, value, 'does not equal', tobe);
+    else console.log(descr, 'PASS', value, 'is', tobe);
+  }
+  const aaa = document.querySelector('my-component').shadowRoot.querySelector("#aaa");
+  const bbb = document.querySelector('#bbb');
+  const ccc = document.querySelector('#ccc');
+  const ddd = document.querySelector('#ddd');
+  expect('aaa contains aaa', contains(aaa,aaa), true);        // true
+  expect('aaa contains bbb', contains(aaa,bbb), true);        // true
+  expect('aaa contains ccc', contains(aaa,ccc), false);       // false
+  expect('aaa contains ddd', contains(aaa,ddd), false);       // false
+  expect('bbb contains aaa', contains(bbb,aaa), false);       // false
+  expect('bbb contains bbb', contains(bbb,bbb), true);        // true
+  expect('bbb contains ccc', contains(bbb,ccc), false);       // false
+  expect('bbb contains ddd', contains(bbb,ddd), false);       // false
+  expect('ccc contains aaa', contains(ccc,aaa), false);       // false
+  expect('ccc contains bbb', contains(ccc,bbb), false);       // false
+  expect('ccc contains ccc', contains(ccc,ccc), true);        // true
+  expect('ccc contains ddd', contains(ccc,ddd), true);        // true
+  expect('ddd contains aaa', contains(ddd,aaa), false);       // false
+  expect('ddd contains bbb', contains(ddd,bbb), false);       // false
+  expect('ddd contains ccc', contains(ddd,ccc), false);       // false
+  expect('ddd contains ddd', contains(ddd,ddd), true);        // true
+</script>
+</body>
+</html>
